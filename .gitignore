@@ -1,0 +1,9 @@
+# Hide your secret passwords and API keys
+.env
+
+# Hide python background system caches
+__pycache__/
+*.pyc
+
+# Hide local database files
+postgres_data/
