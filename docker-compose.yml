@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: auditor_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: my_secure_password
+      POSTGRES_DB: webhook_auditor
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    image: python:3.11-slim
+    container_name: auditor_fastapi_web
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:my_secure_password@db:5432/webhook_auditor
+    command: >
+      sh -c "pip install --no-cache-dir fastapi uvicorn asyncpg sqlalchemy psycopg2-binary &&
+             uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
